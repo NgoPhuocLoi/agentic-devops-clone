@@ -179,12 +179,19 @@ async def create_ec2_instance(
         run_args['InstanceInitiatedShutdownBehavior'] = request.instance_initiated_shutdown_behavior
     
     # Add tags if provided
-    if request.tags:
-        tag_specs = [{
+    tags = []
+    if request.tag_name:
+        tags.append({'Key': 'Name', 'Value': request.tag_name})
+    if request.tag_environment:
+        tags.append({'Key': 'Environment', 'Value': request.tag_environment})
+    if request.tag_owner:
+        tags.append({'Key': 'Owner', 'Value': request.tag_owner})
+    
+    if tags:
+        run_args['TagSpecifications'] = [{
             'ResourceType': 'instance',
-            'Tags': [{'Key': k, 'Value': v} for k, v in request.tags.items()]
+            'Tags': tags
         }]
-        run_args['TagSpecifications'] = tag_specs
     
     # Call AWS API
     response = ec2_client.run_instances(**run_args)

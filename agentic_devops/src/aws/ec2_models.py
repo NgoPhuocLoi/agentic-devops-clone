@@ -6,7 +6,7 @@ creation requests, and instance representation for use with the OpenAI Agents SD
 """
 
 from typing import Dict, List, Optional, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_serializer
 
 
 class EC2InstanceFilter(BaseModel):
@@ -33,9 +33,14 @@ class EC2InstanceFilter(BaseModel):
         description="Instance type to filter by (e.g., 't2.micro')"
     )
     
-    tags: Optional[Dict[str, str]] = Field(
+    tag_key: Optional[str] = Field(
         default=None,
-        description="Tags to filter instances by (key-value pairs)"
+        description="Tag key to filter by"
+    )
+    
+    tag_value: Optional[str] = Field(
+        default=None,
+        description="Tag value to filter by"
     )
     
     def to_aws_filters(self) -> List[Dict[str, Any]]:
@@ -59,12 +64,11 @@ class EC2InstanceFilter(BaseModel):
                 'Values': [self.instance_type]
             })
             
-        if self.tags:
-            for key, value in self.tags.items():
-                filters.append({
-                    'Name': f'tag:{key}',
-                    'Values': [value]
-                })
+        if self.tag_key and self.tag_value:
+            filters.append({
+                'Name': f'tag:{self.tag_key}',
+                'Values': [self.tag_value]
+            })
                 
         return filters
 
@@ -125,9 +129,19 @@ class EC2CreateRequest(BaseModel):
         description="User data script to run on instance launch"
     )
     
-    tags: Optional[Dict[str, str]] = Field(
+    tag_name: Optional[str] = Field(
         default=None,
-        description="Tags to apply to the instance (key-value pairs)"
+        description="Name tag for the instance"
+    )
+    
+    tag_environment: Optional[str] = Field(
+        default=None,
+        description="Environment tag for the instance (e.g., 'dev', 'prod')"
+    )
+    
+    tag_owner: Optional[str] = Field(
+        default=None,
+        description="Owner tag for the instance"
     )
     
     iam_instance_profile: Optional[str] = Field(
@@ -173,9 +187,19 @@ class EC2Instance(BaseModel):
         description="Private IP address of the instance"
     )
     
-    tags: Dict[str, str] = Field(
-        default_factory=dict,
-        description="Tags associated with the instance (key-value pairs)"
+    tag_name: Optional[str] = Field(
+        default=None,
+        description="Name tag of the instance"
+    )
+    
+    tag_environment: Optional[str] = Field(
+        default=None,
+        description="Environment tag of the instance"
+    )
+    
+    tag_owner: Optional[str] = Field(
+        default=None,
+        description="Owner tag of the instance"
     )
     
     launch_time: Optional[str] = Field(
@@ -198,9 +222,14 @@ class EC2Instance(BaseModel):
         description="ID of the subnet where the instance is located"
     )
     
-    security_groups: Optional[List[Dict[str, str]]] = Field(
+    security_group_ids: Optional[List[str]] = Field(
         default=None,
-        description="Security groups associated with the instance"
+        description="Security group IDs associated with the instance"
+    )
+    
+    security_group_names: Optional[List[str]] = Field(
+        default=None,
+        description="Security group names associated with the instance"
     )
     
     @classmethod
@@ -215,9 +244,14 @@ class EC2Instance(BaseModel):
             EC2Instance model
         """
         # Extract tags
-        tags = {}
+        tags_dict = {}
         for tag in instance.get('Tags', []):
-            tags[tag.get('Key')] = tag.get('Value')
+            tags_dict[tag.get('Key')] = tag.get('Value')
+        
+        # Extract security groups
+        security_groups = instance.get('SecurityGroups', [])
+        sg_ids = [sg.get('GroupId') for sg in security_groups if sg.get('GroupId')]
+        sg_names = [sg.get('GroupName') for sg in security_groups if sg.get('GroupName')]
             
         # Create instance
         return cls(
@@ -226,13 +260,13 @@ class EC2Instance(BaseModel):
             instance_type=instance.get('InstanceType'),
             public_ip_address=instance.get('PublicIpAddress'),
             private_ip_address=instance.get('PrivateIpAddress'),
-            tags=tags,
+            tag_name=tags_dict.get('Name'),
+            tag_environment=tags_dict.get('Environment'),
+            tag_owner=tags_dict.get('Owner'),
             launch_time=instance.get('LaunchTime').isoformat() if instance.get('LaunchTime') else None,
             availability_zone=instance.get('Placement', {}).get('AvailabilityZone'),
             vpc_id=instance.get('VpcId'),
             subnet_id=instance.get('SubnetId'),
-            security_groups=[
-                {'id': sg.get('GroupId'), 'name': sg.get('GroupName')}
-                for sg in instance.get('SecurityGroups', [])
-            ]
+            security_group_ids=sg_ids if sg_ids else None,
+            security_group_names=sg_names if sg_names else None
         )
