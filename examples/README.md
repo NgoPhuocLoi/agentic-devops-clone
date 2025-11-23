@@ -41,6 +41,7 @@ These examples demonstrate how to use the OpenAI Agents SDK integration:
 Before running the agent examples, you need to:
 
 1. Install the OpenAI Agents SDK:
+
    ```bash
    pip install openai-agents
    ```
@@ -64,6 +65,8 @@ Before running the agent examples, you need to:
 - `ci_cd_pipeline_agent.py` - Complex CI/CD pipeline management with multiple specialized agents
 - `disaster_recovery_agent.py` - Disaster recovery operations with backup and recovery agents
 - `security_compliance_agent.py` - Security compliance operations with scanning, remediation, and reporting agents
+- **`cd_manifest_generator.py`** - **NEW!** Multi-agent system for generating Dockerfile and Kubernetes manifests from GitHub repositories
+- `cd_manifest_demo.py` - Simple demo of the CD manifest generator
 
 ### Running the Agent Examples
 
@@ -84,6 +87,12 @@ python disaster_recovery_agent.py
 
 # Run the security compliance agent example
 python security_compliance_agent.py
+
+# NEW! Run the CD Manifest Generator (interactive)
+python cd_manifest_generator.py
+
+# NEW! Run the CD Manifest Generator demo (quick)
+python cd_manifest_demo.py
 ```
 
 If you encounter an error about missing modules, make sure you've installed all the required dependencies:
@@ -94,14 +103,53 @@ pip install -r agentic_devops/requirements.txt
 
 ## Example Features
 
+### 🆕 CD Manifest Generator (NEW!)
+
+**The most advanced example** - A sophisticated multi-agent system that automatically generates production-ready deployment artifacts from GitHub repositories.
+
+**Quick Start**:
+
+```bash
+# Setup (one-time)
+./setup_cd_generator.sh
+
+# Run
+python cd_manifest_generator.py
+```
+
+**What it does**:
+
+- 🔍 Analyzes GitHub repositories (Python, Node.js, Java, Go)
+- 🐳 Generates optimized, multi-stage Dockerfiles
+- ☸️ Creates complete Kubernetes manifests (Deployment, Service, ConfigMap, HPA, Ingress)
+- ✏️ Enables interactive refinement with natural language
+- 💾 Saves artifacts to files
+
+**Key Features**:
+
+- **5 Specialized Agents**: Repository Analyzer, Dockerfile Generator, Kubernetes Engineer, Refinement Specialist, Orchestrator
+- **Multi-language Support**: Python (Flask, FastAPI, Django), Node.js (Express, Next.js, React, Vue), Java (Spring Boot), Go
+- **Security Hardened**: Non-root users, minimal base images, resource limits, health checks
+- **Production Ready**: Best practices enforced, auto-scaling configured, TLS support
+- **Interactive**: Refine artifacts with natural language instructions
+
+**Documentation**:
+
+- 📖 [Quick Start Guide](./QUICKSTART.md) - Get started in 5 minutes
+- 📚 [Complete Documentation](./CD_MANIFEST_GENERATOR_README.md) - Full feature guide
+- 🏗️ [Architecture](./ARCHITECTURE.md) - System design diagrams
+- 📊 [Summary](./SUMMARY.md) - Project overview
+
 ### CI/CD Pipeline Management Agent
 
 This example demonstrates a complex multi-step workflow for managing CI/CD pipelines using specialized agents:
+
 - Infrastructure Agent: Manages EC2 instances and other AWS resources
 - Code Agent: Handles GitHub repositories, pull requests, and code quality
 - Deployment Agent: Executes deployments to different environments
 
 Features:
+
 - Custom models for deployment environments and plans
 - Custom tools for validating and executing deployments
 - Guardrails for deployment safety
@@ -111,11 +159,13 @@ Features:
 ### Disaster Recovery Agent
 
 This example demonstrates a complex multi-step workflow for disaster recovery operations using specialized agents:
+
 - Backup Agent: Manages backup information and selection
 - Infrastructure Agent: Manages EC2 instances and other AWS resources
 - Recovery Agent: Executes recovery operations
 
 Features:
+
 - Custom models for backups, recovery targets, and plans
 - Custom tools for listing backups, validating and executing recovery plans
 - Guardrails for recovery safety
@@ -125,12 +175,14 @@ Features:
 ### Security Compliance Agent
 
 This example demonstrates a complex multi-step workflow for security compliance operations using specialized agents:
+
 - Security Scanner Agent: Identifies security issues in infrastructure
 - Compliance Agent: Checks infrastructure against security frameworks
 - Remediation Agent: Creates and executes remediation plans
 - Security Reporting Agent: Generates comprehensive security reports
 
 Features:
+
 - Custom models for security findings, compliance checks, and remediation actions
 - Custom tools for scanning, compliance checking, remediation, and reporting
 - Guardrails for security operations
@@ -153,11 +205,13 @@ The examples use the configuration and credential management from the Agentic De
 If you encounter issues running the examples:
 
 1. Make sure you have installed all required dependencies:
+
    ```bash
    pip install -r agentic_devops/requirements.txt
    ```
 
 2. Ensure your OpenAI API key is set correctly:
+
    ```bash
    export OPENAI_API_KEY=your_api_key_here
    ```
